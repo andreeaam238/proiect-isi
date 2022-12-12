@@ -8,10 +8,6 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 })
 export class LoginPage implements OnInit {
   loginForm = new FormGroup({
-    username: new FormControl(null, {
-      updateOn: 'blur',
-      validators: [Validators.required],
-    }),
     email: new FormControl(null, {
       updateOn: 'blur',
       validators: [Validators.required, Validators.email],

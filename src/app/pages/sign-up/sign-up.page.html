@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Log In</ion-title>
+    <ion-title>Sign Up</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -9,7 +9,10 @@
     <ion-row>
       <ion-col>
         <ion-item>
-          <form [formGroup]="loginForm">
+          <form [formGroup]="signupForm">
+            <ion-label position="floating">Username</ion-label>
+            <ion-input type="text" formControlName="username"></ion-input>
+
             <ion-label position="floating">Email</ion-label>
             <ion-input type="email" formControlName="email"></ion-input>
 
@@ -31,8 +34,8 @@
         <ion-button
           (click)="onSubmit()"
           expand="block"
-          [disabled]="!loginForm.valid"
-          >Login</ion-button
+          [disabled]="!signupForm.valid"
+          >Sign Up</ion-button
         >
       </ion-col>
     </ion-row>
