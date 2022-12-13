@@ -2,13 +2,16 @@ import { Injectable } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/compat/database';
 import { Observable } from 'rxjs';
 
-export interface ITestItem {
-  name: string;
-  lat: number;
-  lng: number;
+export interface User {
+  user_id: string;
+  username: string;
+  email: string;
+  creation_date: string;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class FirebaseService {
   listFeed: Observable<any[]>;
   objFeed: Observable<any>;
@@ -28,6 +31,7 @@ export class FirebaseService {
     return this.objFeed;
   }
 
+  /*
   addPointItem(lat: number, lng: number) {
     let item: ITestItem = {
       name: 'test',
@@ -44,5 +48,16 @@ export class FirebaseService {
       lng: lng,
     };
     this.db.object('obj').set([item]);
+  }
+  */
+
+  addUser(id: string, username: string, email: string) {
+    let item: User = {
+      user_id: id,
+      username: username,
+      email: email,
+      creation_date: new Date().toISOString(),
+    };
+    this.db.list('users').push(item);
   }
 }

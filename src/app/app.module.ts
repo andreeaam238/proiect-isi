@@ -14,7 +14,7 @@ import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AuthenticationService } from './services/auth.service';
-import { FirebaseService } from './services/database/firebase';
+import { FirebaseService } from './services/database/firebase.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -22,7 +22,7 @@ import { FirebaseService } from './services/database/firebase';
     BrowserModule,
     IonicModule.forRoot(),
     AppRoutingModule,
-    AngularFireModule.initializeApp(environment.firebase, "proiect-isi"),
+    AngularFireModule.initializeApp(environment.firebase, 'proiect-isi'),
     AngularFireAuthModule,
     AngularFirestoreModule,
     AngularFireStorageModule,
@@ -35,4 +35,4 @@ import { FirebaseService } from './services/database/firebase';
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

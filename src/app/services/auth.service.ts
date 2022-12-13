@@ -7,6 +7,7 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
+import { FirebaseService } from './database/firebase.service';
 @Injectable({
   providedIn: 'root',
 })
@@ -16,7 +17,8 @@ export class AuthenticationService {
     public afStore: AngularFirestore,
     public ngFireAuth: AngularFireAuth,
     public router: Router,
-    public ngZone: NgZone
+    public ngZone: NgZone,
+    private firebaseService: FirebaseService
   ) {
     this.ngFireAuth.authState.subscribe((user) => {
       if (user) {
@@ -47,7 +49,7 @@ export class AuthenticationService {
       });
   }
 
-  async RegisterUser(email: string, password: string) {
+  async RegisterUser(email: string, password: string, username: string) {
     try {
       const result = await this.ngFireAuth.createUserWithEmailAndPassword(
         email,
@@ -56,6 +58,7 @@ export class AuthenticationService {
 
       this.SendVerificationMail();
       this.SetUserData(result.user);
+      this.firebaseService.addUser(result.user.uid, username, email);
     } catch (error) {
       window.alert(error.message);
     }

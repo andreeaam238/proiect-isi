@@ -7,6 +7,8 @@ export const environment = {
   firebase: {
     apiKey: 'AIzaSyCul2J9E4PjLWrXPlIELRvTHR92lOnUE-0',
     authDomain: 'proiect-isi-b0979.firebaseapp.com',
+    databaseURL:
+      'https://proiect-isi-b0979-default-rtdb.europe-west1.firebasedatabase.app',
     projectId: 'proiect-isi-b0979',
     storageBucket: 'proiect-isi-b0979.appspot.com',
     messagingSenderId: '445045114057',
