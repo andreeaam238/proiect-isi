@@ -29,7 +29,8 @@
     <ion-row>
       <ion-col>
         <ion-button
-          (click)="onSubmit()"
+          type="submit"
+          (click)="signIn()"
           expand="block"
           [disabled]="!loginForm.valid"
           >Login</ion-button

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthenticationService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-sign-up',
@@ -22,9 +24,12 @@ export class SignUpPage implements OnInit {
     }),
   });
 
-  constructor() {}
+  constructor(
+    public authService: AuthenticationService,
+    public router: Router
+  ) { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   getFormControl(formControlName: string) {
     return this.signupForm.get(formControlName) as FormControl;
@@ -34,7 +39,11 @@ export class SignUpPage implements OnInit {
     return this.signupForm.valid;
   }
 
-  onSubmit() {
-    console.log(this.signupForm);
+  signUp() {
+    this.authService
+      .RegisterUser(
+        this.getFormControl('email').value,
+        this.getFormControl('password').value
+      );
   }
 }
