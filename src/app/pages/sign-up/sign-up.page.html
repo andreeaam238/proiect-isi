@@ -1,5 +1,8 @@
 <ion-header>
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
     <ion-title>Sign Up</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -27,6 +30,11 @@
             <ion-input type="password" formControlName="password"></ion-input>
           </form>
         </ion-item>
+
+        <ion-button fill="clear"
+          >Already have an account?&nbsp;
+          <a routerLink="/login">Log in now!</a></ion-button
+        >
       </ion-col>
     </ion-row>
     <ion-row>
