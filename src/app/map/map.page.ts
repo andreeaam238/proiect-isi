@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Platform } from '@ionic/angular';
-import { setDefaultOptions, loadModules } from 'esri-loader';
+import { loadModules } from 'esri-loader';
 
 import esri = __esri; // Esri TypeScript Types
 
@@ -18,22 +18,30 @@ export class MapPage implements OnInit {
   async getGeo() {
     await this.platform.ready();
 
-    const [Map, MapView, Compass]: any = await loadModules([
-      'esri/Map',
-      'esri/views/MapView',
-      'esri/widgets/Compass',
-    ]).catch((err) => {
-      console.error('ArcGIS: ', err);
-    });
+    const [esriConfig, Map, MapView, Compass, Locate, Track, Graphic]: any =
+      await loadModules([
+        'esri/config',
+        'esri/Map',
+        'esri/views/MapView',
+        'esri/widgets/Compass',
+        'esri/widgets/Locate',
+        'esri/widgets/Track',
+        'esri/Graphic',
+      ]).catch((err) => {
+        console.error('ArcGIS: ', err);
+      });
+
+    esriConfig.apiKey =
+      'AAPK96c3dc2e11734f96852b9f83319128a7AwtXTcRvExfL9-yYgVLNKW5ONYv3yLXUNbel0FxQySEL4FyIbt1Fuw7njdOAaljf';
 
     let map = new Map({
-      basemap: 'hybrid',
+      basemap: 'arcgis-navigation',
     });
 
     let mapView = new MapView({
       container: this.mapEl.nativeElement,
       center: [26.096306, 44.439663],
-      zoom: 12,
+      zoom: 10,
       map: map,
     });
 
@@ -42,6 +50,18 @@ export class MapPage implements OnInit {
     });
 
     mapView.ui.add(compassWidget, 'top-left');
+
+    const track = new Track({
+      view: mapView,
+      goToLocationEnabled: true,
+      scale: 5000,
+    });
+
+    mapView.ui.add(track, 'top-left');
+
+    mapView.when(() => {
+      track.start();
+    });
   }
 
   ngOnInit() {
