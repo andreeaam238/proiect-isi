@@ -18,6 +18,7 @@ import esri = __esri; // Esri TypeScript Types
 export class MapPage implements AfterViewInit {
   @ViewChild('map', { static: true }) mapEl: ElementRef;
   mapView: any = null;
+  track: any = null;
 
   // register Dojo AMD dependencies
   _Map;
@@ -49,7 +50,6 @@ export class MapPage implements AfterViewInit {
       Map,
       MapView,
       Compass,
-      Locate,
       Track,
       Graphic,
       GraphicsLayer,
@@ -66,7 +66,6 @@ export class MapPage implements AfterViewInit {
       'esri/Map',
       'esri/views/MapView',
       'esri/widgets/Compass',
-      'esri/widgets/Locate',
       'esri/widgets/Track',
       'esri/Graphic',
       'esri/layers/GraphicsLayer',
@@ -88,7 +87,6 @@ export class MapPage implements AfterViewInit {
     this._Graphic = Graphic;
     this._RouteParameters = RouteParameters;
     this._Compass = Compass;
-    this._Locate = Locate;
     this._Track = Track;
     this._LayerList = LayerList;
     this._BasemapGallery = BasemapGallery;
@@ -341,24 +339,12 @@ export class MapPage implements AfterViewInit {
 
     this.mapView.ui.add(compassWidget, 'top-left');
 
-    const locate = new Locate({
+    this.track = new Track({
       view: this.mapView,
-      useHeadingEnabled: false,
-      goToOverride: function (view, options) {
-        options.target.scale = 5000;
-        return view.goTo(options.target);
-      },
-    });
-
-    this.mapView.ui.add(locate, 'top-left');
-
-    const track = new Track({
-      view: this.mapView,
-      goToLocationEnabled: false,
       scale: 5000,
     });
 
-    this.mapView.ui.add(track, 'top-left');
+    this.mapView.ui.add(this.track, 'top-left');
 
     const layerList = new LayerList({
       view: this.mapView,
@@ -400,14 +386,31 @@ export class MapPage implements AfterViewInit {
       'https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World';
 
     this.mapView.on('click', (event) => {
-      if (this.mapView.graphics.length === 0) {
-        addGraphic('origin', event.mapPoint);
-      } else if (this.mapView.graphics.length === 1) {
-        addGraphic('destination', event.mapPoint);
-        getRoute(); // Call the route service
+      if (this.track.tracking) {
+        if (this.mapView.graphics.length === 0) {
+          addGraphic('origin', event.mapPoint);
+        } else if (this.mapView.graphics.length === 1) {
+          addGraphic('destination', event.mapPoint);
+          getRoute();
+        } else if (this.mapView.graphics.length === 4) {
+          this.mapView.graphics = this.mapView.graphics.slice(3);
+          addGraphic('destination', event.mapPoint);
+          getRoute();
+        } else {
+          this.mapView.graphics = this.mapView.graphics.slice(0, -2);
+          addGraphic('destination', event.mapPoint);
+          getRoute();
+        }
       } else {
-        this.mapView.graphics.removeAll();
-        addGraphic('origin', event.mapPoint);
+        if (this.mapView.graphics.length === 0) {
+          addGraphic('origin', event.mapPoint);
+        } else if (this.mapView.graphics.length === 1) {
+          addGraphic('destination', event.mapPoint);
+          getRoute();
+        } else {
+          this.mapView.graphics.removeAll();
+          addGraphic('origin', event.mapPoint);
+        }
       }
     });
 
@@ -452,21 +455,16 @@ export class MapPage implements AfterViewInit {
             directions.style.padding = '15px 15px 15px 30px';
             const features = data.routeResults[0].directions.features;
 
-            let sum = 0;
             // Show each direction
             features.forEach((result: any, i: any) => {
-              sum += parseFloat(result.attributes.length);
               const direction = document.createElement('li');
               direction.innerHTML =
                 result.attributes.text +
                 ' (' +
-                result.attributes.length +
-                ' miles)';
+                result.attributes.length * 1.609344 +
+                ' km)';
               directions.appendChild(direction);
             });
-
-            sum = sum * 1.609344;
-            console.log('dist (km) = ', sum);
 
             this.mapView.ui.empty('top-right');
             this.mapView.ui.add(directions, 'top-right');
