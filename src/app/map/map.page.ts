@@ -167,11 +167,11 @@ export class MapPage implements AfterViewInit {
     // Create a line geometry
     var simpleLineSymbol = {
       type: 'simple-line',
-      color: 'red', // orange
+      color: 'red',
       width: 3,
     };
 
-    var graphicsLayer = new GraphicsLayer();
+    var graphicsLayer = new GraphicsLayer({ title: 'DNCB' });
     map.add(graphicsLayer);
 
     var polyline = {
