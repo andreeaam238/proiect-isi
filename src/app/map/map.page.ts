@@ -28,6 +28,9 @@ export class MapPage implements OnInit {
       Track,
       Graphic,
       FeatureLayer,
+      LayerList,
+      BasemapGallery,
+      Expand,
     ]: any = await loadModules([
       'esri/config',
       'esri/Map',
@@ -37,6 +40,9 @@ export class MapPage implements OnInit {
       'esri/widgets/Track',
       'esri/Graphic',
       'esri/layers/FeatureLayer',
+      'esri/widgets/LayerList',
+      'esri/widgets/BasemapGallery',
+      'esri/widgets/Expand',
     ]).catch((err) => {
       console.error('ArcGIS: ', err);
     });
@@ -84,6 +90,7 @@ export class MapPage implements OnInit {
       renderer: bikeTrailsLineRenderer,
       outFields: ['Name', 'Length'],
       popupTemplate: popupTrails,
+      title: 'Bike Trails',
     });
 
     map.add(bikeTrailsLineFeatureLayer);
@@ -101,6 +108,7 @@ export class MapPage implements OnInit {
     const bikeTrailsFeatureLayer: __esri.FeatureLayer = new FeatureLayer({
       url: 'https://services7.arcgis.com/BPmbOobL1X8Rtqka/arcgis/rest/services/piste_de_biciclete_bucuresti/FeatureServer/0',
       renderer: trailheadsRenderer,
+      title: 'Bike Trails With Symbol',
     });
 
     map.add(bikeTrailsFeatureLayer);
@@ -125,6 +133,40 @@ export class MapPage implements OnInit {
     });
 
     mapView.ui.add(track, 'top-left');
+
+    const layerList = new LayerList({
+      view: mapView,
+      listItemCreatedFunction: (event) => {
+        const item = event.item;
+        if (item.layer.type != 'group') {
+          item.panel = {
+            content: 'legend',
+            open: false,
+          };
+        }
+      },
+    });
+
+    const layerListExpand = new Expand({
+      view: mapView,
+      content: layerList,
+    });
+
+    mapView.ui.add(layerListExpand, {
+      position: 'top-right',
+    });
+
+    var basemapGallery = new BasemapGallery({
+      view: mapView,
+    });
+
+    const bgExpand = new Expand({
+      view: mapView,
+      content: basemapGallery,
+    });
+
+    // Add the expand instance to the ui
+    mapView.ui.add(bgExpand, 'top-right');
 
     mapView.when(() => {
       track.start();
