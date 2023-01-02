@@ -169,7 +169,9 @@ export class MapPage implements AfterViewInit {
       width: 3,
     };
 
-    var graphicsLayer = new GraphicsLayer({ title: 'DNCB' });
+    var graphicsLayer = new GraphicsLayer({
+      title: 'DNCB',
+    });
     map.add(graphicsLayer);
 
     var polyline = {
@@ -345,12 +347,20 @@ export class MapPage implements AfterViewInit {
     });
 
     this.mapView.ui.add(this.track, 'top-left');
+    this.track.container.addEventListener('click', () => {
+      setTimeout(() => {
+        if (!this.track.tracking) {
+          this.mapView.graphics.removeAll();
+          this.mapView.ui.empty('bottom-right');
+        }
+      }, 50);
+    });
 
     const layerList = new LayerList({
       view: this.mapView,
       listItemCreatedFunction: (event) => {
         const item = event.item;
-        if (item.layer.type != 'group') {
+        if (item.layer.type != 'graphics') {
           item.panel = {
             content: 'legend',
             open: true,
@@ -448,7 +458,26 @@ export class MapPage implements AfterViewInit {
 
           // Display directions
           if (data.routeResults.length > 0) {
+            const container: any = document.createElement('div');
             const directions: any = document.createElement('ol');
+            const close: any = document.createElement('button');
+            close.innerHTML = 'X';
+            close.style.margin = '8px 16px 0';
+            close.style.background = 'transparent';
+            close.style.color = 'black';
+
+            close.addEventListener('click', () => {
+              this.mapView.ui.empty('bottom-right');
+              if (this.mapView.graphics.getItemAt(0).symbol.color === null) {
+                this.mapView.graphics = this.mapView.graphics.slice(0, 1);
+              } else {
+                this.mapView.graphics.removeAll();
+              }
+            });
+            container.appendChild(close);
+            container.appendChild(directions);
+            container.classList =
+              'esri-widget esri-widget--panel esri-directions__scroller';
             directions.classList =
               'esri-widget esri-widget--panel esri-directions__scroller';
             directions.style.marginTop = '0';
@@ -466,8 +495,8 @@ export class MapPage implements AfterViewInit {
               directions.appendChild(direction);
             });
 
-            this.mapView.ui.empty('top-right');
-            this.mapView.ui.add(directions, 'top-right');
+            this.mapView.ui.empty('bottom-right');
+            this.mapView.ui.add(container, 'bottom-right');
           }
         })
         .catch((error: any) => {
