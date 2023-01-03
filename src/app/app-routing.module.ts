@@ -26,7 +26,8 @@ const routes: Routes = [
   {
     path: 'map',
     canActivate: [AuthGuard],
-    loadChildren: () => import('./widgets/map/map.module').then((m) => m.MapPageModule),
+    loadChildren: () =>
+      import('./pages/map/map.module').then((m) => m.MapPageModule),
   },
 ];
 

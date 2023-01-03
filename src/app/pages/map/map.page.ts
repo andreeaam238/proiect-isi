@@ -1,15 +1,17 @@
 import {
   AfterViewInit,
   Component,
-  ElementRef, EventEmitter,
-  OnInit, Output,
+  ElementRef,
+  EventEmitter,
+  OnInit,
+  Output,
   ViewChild,
 } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { loadModules, setDefaultOptions } from 'esri-loader';
 
 import esri = __esri;
-import {Point} from "esri/geometry"; // Esri TypeScript Types
+import { Point } from 'esri/geometry'; // Esri TypeScript Types
 
 @Component({
   selector: 'app-map',
@@ -64,6 +66,7 @@ export class MapPage implements AfterViewInit {
       RouteParameters,
       FeatureSet,
       Legend,
+      locator,
     ]: any = await loadModules([
       'esri/config',
       'esri/Map',
@@ -80,6 +83,7 @@ export class MapPage implements AfterViewInit {
       'esri/rest/support/RouteParameters',
       'esri/rest/support/FeatureSet',
       'esri/widgets/Legend',
+      'esri/rest/locator',
     ]).catch((err) => {
       console.error('ArcGIS: ', err);
     });
@@ -98,6 +102,7 @@ export class MapPage implements AfterViewInit {
     this._RouteParameters = RouteParameters;
     this._FeatureSet = FeatureSet;
     this._Legend = Legend;
+    this._locator = locator;
 
     esriConfig.apiKey =
       'AAPK96c3dc2e11734f96852b9f83319128a7AwtXTcRvExfL9-yYgVLNKW5ONYv3yLXUNbel0FxQySEL4FyIbt1Fuw7njdOAaljf';
@@ -146,8 +151,6 @@ export class MapPage implements AfterViewInit {
     });
 
     map.add(bikeTrailsLineFeatureLayer);
-
-
 
     const trailheadsRenderer = {
       type: 'simple',
@@ -394,51 +397,50 @@ export class MapPage implements AfterViewInit {
 
     // Add the expand instance to the ui
     this.mapView.ui.add(bgExpand, 'top-right');
-    console.log('exista select')
 
     const places = [
-      "Choose a place type...",
-      "pompe pentr umflat roți",
-      "magazine cu piese pentru biciclete",
-      "centre de închiriat biciclete",
-      "locuri de parcare pentru biciclete"
-
+      'Choose a place type...',
+      'Parks and Outdoors',
+      'Parking',
+      'Gas station',
+      'Sporting Goods Store',
     ];
-    console.log('exista select')
 
-    const select = document.createElement("select");
-    select.setAttribute("class", "esri-widget esri-select");
+    const select = document.createElement('select');
+    select.setAttribute('class', 'esri-widget esri-select');
     select.setAttribute(
-      "style",
-      "width: 200px; font-family: 'Avenir Next W00'; font-size: 1em"
+      'style',
+      "width: 175px; font-family: 'Avenir Next W00'; font-size: 1em"
     );
-    console.log('exista select' + select)
+
     places.forEach((p) => {
-      const option = document.createElement("option");
+      const option = document.createElement('option');
       option.value = p;
       option.innerHTML = p;
       select.appendChild(option);
     });
 
-    this.mapView.ui.add(select, "top-right");
+    const selectExpand = new Expand({
+      view: this.mapView,
+      content: select,
+    });
+
+    this.mapView.ui.add(selectExpand, 'top-right');
 
     // Search for places in center of map
-    this.mapView.watch("stationary", (val) => {
+    this.mapView.watch('stationary', (val) => {
       if (val) {
         this.findPlaces(select.value, this.mapView.center);
       }
     });
 
     // Listen for category changes and find places
-    select.addEventListener("change", (event) => {
+    select.addEventListener('change', (event) => {
       this.findPlaces(
         (<HTMLSelectElement>event.target).value,
         this.mapView.center
       );
     });
-
-    this.mapLoadedEvent.emit(true);
-
   }
 
   addRouter() {
@@ -560,45 +562,49 @@ export class MapPage implements AfterViewInit {
   }
 
   findPlaces(category: string, pt: Point) {
-    if (category === "Choose a place type...") {
+    if (category === 'Choose a place type...') {
+      this.mapView.graphics = this.mapView.graphics.filter(
+        (graphic) => graphic.symbol.color === null
+      );
       return;
+    } else {
+      this.track.stop();
     }
 
     const geocodingServiceUrl =
-      "http://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+      'http://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer';
 
     const params = {
       location: pt,
       categories: [category],
       maxLocations: 25,
-      outFields: ["Place_addr", "PlaceName"],
+      outFields: ['Place_addr', 'PlaceName'],
     };
 
     const showResults = (results) => {
       this.mapView.popup.close();
       this.mapView.graphics.removeAll();
-      // TODO pe undeva pe aici trebuie puse coordonatele
       results.forEach((result) => {
         this.mapView.graphics.add(
           new this._Graphic({
             attributes: result.attributes,
             geometry: result.location,
             symbol: {
-              type: "simple-marker",
-              color: "black",
-              size: "10px",
+              type: 'simple-marker',
+              color: 'black',
+              size: '10px',
               outline: {
-                color: "#ffffff",
-                width: "2px",
+                color: '#ffffff',
+                width: '2px',
               },
             },
             popupTemplate: {
-              title: "{PlaceName}",
+              title: '{PlaceName}',
               content:
-                "{Place_addr}" +
-                "<br><br>" +
+                '{Place_addr}' +
+                '<br><br>' +
                 result.location.x.toFixed(5) +
-                "," +
+                ',' +
                 result.location.y.toFixed(5),
             },
           })
@@ -621,5 +627,4 @@ export class MapPage implements AfterViewInit {
       })
       .catch((err) => console.warn(err));
   }
-
 }
