@@ -397,6 +397,7 @@ export class MapPage implements AfterViewInit {
     console.log('exista select')
 
     const places = [
+      "Choose a place type...",
       "pompe pentr umflat roți",
       "magazine cu piese pentru biciclete",
       "centre de închiriat biciclete",
