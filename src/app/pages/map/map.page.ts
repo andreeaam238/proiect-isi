@@ -427,6 +427,38 @@ export class MapPage implements AfterViewInit {
 
     this.mapView.ui.add(selectExpand, 'top-right');
 
+    // Add event signaling
+
+    this.mapView.ui.add(bgExpand, 'top-right');
+
+    const trafficEvents = [
+      'Choose a traffic event...',
+      'car parked illegally',
+      'pothole',
+      'runway under construction'
+    ];
+
+    const selectForTrafficEvents = document.createElement('select');
+    selectForTrafficEvents.setAttribute('class', 'esri-widget esri-select');
+    selectForTrafficEvents.setAttribute(
+      'style',
+      "width: 175px; font-family: 'Avenir Next W00'; font-size: 1em"
+    );
+
+    trafficEvents.forEach((p) => {
+      const option = document.createElement('option');
+      option.value = p;
+      option.innerHTML = p;
+      selectForTrafficEvents.appendChild(option);
+    });
+
+    const selectExpandTrafficEvents = new Expand({
+      view: this.mapView,
+      content: selectForTrafficEvents,
+    });
+
+    this.mapView.ui.add(selectExpandTrafficEvents, 'top-right');
+    // End event signaling
     // Search for places in center of map
     this.mapView.watch('stationary', (val) => {
       if (val) {
