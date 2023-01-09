@@ -459,6 +459,15 @@ export class MapPage implements AfterViewInit {
 
     this.mapView.ui.add(selectExpandTrafficEvents, 'top-right');
     // End event signaling
+
+    // Listen for traffic events changing
+    selectForTrafficEvents.addEventListener('change', async (event) => {
+      console.log((<HTMLSelectElement>event.target).value);
+      navigator.geolocation.getCurrentPosition((pos) => {
+        console.log(pos.coords.latitude, pos.coords.longitude);
+      });
+    });
+
     // Search for places in center of map
     this.mapView.watch('stationary', (val) => {
       if (val) {
