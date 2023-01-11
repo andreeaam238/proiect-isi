@@ -9,6 +9,12 @@ export interface User {
   creation_date: string;
 }
 
+export interface ITrafficEvent {
+  name: string;
+  lat: number;
+  lng: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -31,25 +37,28 @@ export class FirebaseService {
     return this.objFeed;
   }
 
-  /*
-  addPointItem(lat: number, lng: number) {
-    let item: ITestItem = {
-      name: 'test',
+  getPoints() {
+    return this.db.object('obj');
+  }
+
+  addPointItem(lat: number, lng: number, name: string) {
+    let item: ITrafficEvent = {
+      name: name,
       lat: lat,
       lng: lng,
     };
     this.db.list('list').push(item);
   }
 
-  syncPointItem(lat: number, lng: number) {
-    let item: ITestItem = {
-      name: 'test',
+  syncPointItem(lat: number, lng: number, name: string) {
+    let item: ITrafficEvent = {
+      name: name,
       lat: lat,
       lng: lng,
     };
     this.db.object('obj').set([item]);
   }
-  */
+  
 
   addUser(id: string, username: string, email: string) {
     let item: User = {

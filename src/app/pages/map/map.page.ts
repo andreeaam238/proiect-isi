@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { loadModules, setDefaultOptions } from 'esri-loader';
+import { FirebaseService, ITrafficEvent } from 'src/app/services/database/firebase.service';
 
 import esri = __esri;
 import { Point } from 'esri/geometry'; // Esri TypeScript Types
@@ -46,7 +47,7 @@ export class MapPage implements AfterViewInit {
   _Expand;
   _Legend;
 
-  constructor(public platform: Platform) {}
+  constructor(public platform: Platform, private fbs: FirebaseService) {}
 
   async getGeo() {
     await this.platform.ready();
@@ -468,37 +469,49 @@ export class MapPage implements AfterViewInit {
     this.mapView.ui.add(selectExpandTrafficEvents, 'top-right');
     // End event signaling
     
+    function makePointGraphic(lat: number, long: number, trafficEvent: string) {
+      const point = {
+        type: 'point',
+        longitude: long,
+        latitude: lat,
+      };
+      const simpleMarkerSymbol = {
+        type: 'simple-marker',
+        color: [226, 119, 40], // Orange
+        outline: {
+          color: [255, 255, 255], // White
+          width: 1,
+        },
+      };
+      if (trafficEvent === 'car parked illegally')
+        simpleMarkerSymbol.color = [227, 39, 18];
+      else if (trafficEvent === 'pothole')
+        simpleMarkerSymbol.color = [240, 65, 12];
+      else if (trafficEvent === 'runway under construction')
+        simpleMarkerSymbol.color = [240, 111, 12];
+      const pointGraphic = new Graphic({
+        geometry: point,
+        symbol: simpleMarkerSymbol,
+      });
+
+      return pointGraphic;
+    }
+
     // Listen for traffic events changing
     selectForTrafficEvents.addEventListener('change', async (event) => {
       console.log((<HTMLSelectElement>event.target).value);
       const trafficEvent = (<HTMLSelectElement>event.target).value;
       navigator.geolocation.getCurrentPosition((pos) => {
-        const point = {
-          type: 'point',
-          longitude: pos.coords.longitude,
-          latitude: pos.coords.latitude,
-        };
-        const simpleMarkerSymbol = {
-          type: 'simple-marker',
-          color: [226, 119, 40], // Orange
-          outline: {
-            color: [255, 255, 255], // White
-            width: 1,
-          },
-        };
-        if (trafficEvent === 'car parked illegally')
-          simpleMarkerSymbol.color = [227, 39, 18];
-        else if (trafficEvent === 'pothole')
-          simpleMarkerSymbol.color = [240, 65, 12];
-        else if (trafficEvent === 'runway under construction')
-          simpleMarkerSymbol.color = [240, 111, 12];
-        const pointGraphic = new Graphic({
-          geometry: point,
-          symbol: simpleMarkerSymbol,
-        });
-        graphicsLayer.add(pointGraphic);
-        
+        this.fbs.addPointItem(pos.coords.latitude, pos.coords.longitude, trafficEvent);
       });
+    });
+    // add traffic events from database
+    this.fbs.connectToDatabase();
+    this.fbs.getChangeFeedList().subscribe((items: ITrafficEvent[]) => {
+      for (let item of items) {
+        let point = makePointGraphic(item.lat, item.lng, item.name);
+        graphicsLayer.add(point);
+      }
     });
 
     // Search for places in center of map
