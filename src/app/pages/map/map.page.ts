@@ -27,6 +27,8 @@ export class MapPage implements AfterViewInit {
 
   // register Dojo AMD dependencies
   _Map;
+  _MapImage;
+  _MapImageLayer;
   _MapView;
   _FeatureLayer;
   _Graphic;
@@ -67,6 +69,8 @@ export class MapPage implements AfterViewInit {
       FeatureSet,
       Legend,
       locator,
+      MapImageLayer,
+      MapImage,
     ]: any = await loadModules([
       'esri/config',
       'esri/Map',
@@ -84,11 +88,15 @@ export class MapPage implements AfterViewInit {
       'esri/rest/support/FeatureSet',
       'esri/widgets/Legend',
       'esri/rest/locator',
+      'esri/layers/MapImageLayer',
+      'esri/layers/support/MapImage',
     ]).catch((err) => {
       console.error('ArcGIS: ', err);
     });
 
     this._Map = Map;
+    this._MapImage = MapImage;
+    this._MapImageLayer = MapImageLayer;
     this._MapView = MapView;
     this._FeatureLayer = FeatureLayer;
     this._Graphic = Graphic;
@@ -459,12 +467,37 @@ export class MapPage implements AfterViewInit {
 
     this.mapView.ui.add(selectExpandTrafficEvents, 'top-right');
     // End event signaling
-
+    
     // Listen for traffic events changing
     selectForTrafficEvents.addEventListener('change', async (event) => {
       console.log((<HTMLSelectElement>event.target).value);
+      const trafficEvent = (<HTMLSelectElement>event.target).value;
       navigator.geolocation.getCurrentPosition((pos) => {
-        console.log(pos.coords.latitude, pos.coords.longitude);
+        const point = {
+          type: 'point',
+          longitude: pos.coords.longitude,
+          latitude: pos.coords.latitude,
+        };
+        const simpleMarkerSymbol = {
+          type: 'simple-marker',
+          color: [226, 119, 40], // Orange
+          outline: {
+            color: [255, 255, 255], // White
+            width: 1,
+          },
+        };
+        if (trafficEvent === 'car parked illegally')
+          simpleMarkerSymbol.color = [227, 39, 18];
+        else if (trafficEvent === 'pothole')
+          simpleMarkerSymbol.color = [240, 65, 12];
+        else if (trafficEvent === 'runway under construction')
+          simpleMarkerSymbol.color = [240, 111, 12];
+        const pointGraphic = new Graphic({
+          geometry: point,
+          symbol: simpleMarkerSymbol,
+        });
+        graphicsLayer.add(pointGraphic);
+        
       });
     });
 
