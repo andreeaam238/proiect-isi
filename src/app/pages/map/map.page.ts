@@ -435,7 +435,7 @@ export class MapPage implements AfterViewInit {
       'Choose a traffic event...',
       'car parked illegally',
       'pothole',
-      'runway under construction'
+      'runway under construction',
     ];
 
     const selectForTrafficEvents = document.createElement('select');
@@ -605,7 +605,11 @@ export class MapPage implements AfterViewInit {
   findPlaces(category: string, pt: Point) {
     if (category === 'Choose a place type...') {
       this.mapView.graphics = this.mapView.graphics.filter(
-        (graphic) => graphic.symbol.color === null
+        (graphic) =>
+          graphic.symbol.color === null ||
+          graphic.symbol.color.toHex() == '#ffffff' ||
+          graphic.symbol.color.toHex() == '#000000' ||
+          graphic.symbol.color.toHex() == '#0596ff'
       );
       return;
     } else {
@@ -632,10 +636,10 @@ export class MapPage implements AfterViewInit {
             geometry: result.location,
             symbol: {
               type: 'simple-marker',
-              color: 'black',
+              color: '#5C0404',
               size: '10px',
               outline: {
-                color: '#ffffff',
+                color: '#5C0404',
                 width: '2px',
               },
             },
