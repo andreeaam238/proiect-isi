@@ -9,7 +9,10 @@ import {
 } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { loadModules, setDefaultOptions } from 'esri-loader';
-import { FirebaseService, ITrafficEvent } from 'src/app/services/database/firebase.service';
+import {
+  FirebaseService,
+  ITrafficEvent,
+} from 'src/app/services/database/firebase.service';
 
 import esri = __esri;
 import { Point } from 'esri/geometry'; // Esri TypeScript Types
@@ -442,9 +445,9 @@ export class MapPage implements AfterViewInit {
 
     const trafficEvents = [
       'Choose a traffic event...',
-      'car parked illegally',
-      'pothole',
-      'runway under construction',
+      'Car parked illegally',
+      'Pothole',
+      'Road under construction',
     ];
 
     const selectForTrafficEvents = document.createElement('select');
@@ -468,7 +471,7 @@ export class MapPage implements AfterViewInit {
 
     this.mapView.ui.add(selectExpandTrafficEvents, 'top-right');
     // End event signaling
-    
+
     function makePointGraphic(lat: number, long: number, trafficEvent: string) {
       const point = {
         type: 'point',
@@ -483,11 +486,11 @@ export class MapPage implements AfterViewInit {
           width: 1,
         },
       };
-      if (trafficEvent === 'car parked illegally')
+      if (trafficEvent === 'Car parked illegally')
         simpleMarkerSymbol.color = [227, 39, 18];
-      else if (trafficEvent === 'pothole')
+      else if (trafficEvent === 'Pothole')
         simpleMarkerSymbol.color = [240, 65, 12];
-      else if (trafficEvent === 'runway under construction')
+      else if (trafficEvent === 'Road under construction')
         simpleMarkerSymbol.color = [240, 111, 12];
       const pointGraphic = new Graphic({
         geometry: point,
@@ -502,7 +505,11 @@ export class MapPage implements AfterViewInit {
       console.log((<HTMLSelectElement>event.target).value);
       const trafficEvent = (<HTMLSelectElement>event.target).value;
       navigator.geolocation.getCurrentPosition((pos) => {
-        this.fbs.addPointItem(pos.coords.latitude, pos.coords.longitude, trafficEvent);
+        this.fbs.addPointItem(
+          pos.coords.latitude,
+          pos.coords.longitude,
+          trafficEvent
+        );
       });
     });
     // add traffic events from database
@@ -534,7 +541,7 @@ export class MapPage implements AfterViewInit {
     const routeUrl =
       'https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World';
 
-    this.mapView.on('click', (event) => {
+    this.mapView.on('hold', (event) => {
       if (this.track.tracking) {
         if (this.mapView.graphics.length === 0) {
           addGraphic('origin', event.mapPoint);
