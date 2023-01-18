@@ -461,6 +461,12 @@ export class MapPage implements AfterViewInit {
       const option = document.createElement('option');
       option.value = p;
       option.innerHTML = p;
+      if (p === 'Car parked illegally')
+        option.style.color = '#E32712';
+      if (p === 'Pothole')
+        option.style.color = '#F0410C';
+      if (p === 'Road under construction')
+        option.style.color = '#F06F0C';
       selectForTrafficEvents.appendChild(option);
     });
 
